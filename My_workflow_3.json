@@ -1,0 +1,84 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "16e0720d-66c1-44cf-b45e-40b74057e1fc",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.kdnuggets.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "ea5bd16c-8bf7-484e-815c-2bfe4ef8e851",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "jsCode": "const DAYS_BACK = 3;\n\nconst now = new Date();\nconst cutoffTime = now.getTime() - DAYS_BACK * 24 * 60 * 60 * 1000;\n\nconst recentItems = items.map(item => {\n  const pubDate =\n    item.json.pubDate ||\n    item.json.isoDate ||\n    item.json.published ||\n    item.json.date;\n\n  const itemTime = pubDate ? new Date(pubDate).getTime() : null;\n\n  item.json.isRecent = itemTime !== null && itemTime >= cutoffTime;\n  return item;\n});\n\nconst filtered = recentItems.filter(item => item.json.isRecent);\n\nif (filtered.length > 0) {\n  return filtered;\n}\n\nreturn [recentItems[0]];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "30e2b25a-08dc-4da9-ab3e-5a30222672de",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "47cfd140-3728-4073-9deb-16503759f3ea",
+  "meta": {
+    "instanceId": "bacd8033ba65539c76f78e3d88e5a5cd3b77e387307d08eb29cd9df1ba498992"
+  },
+  "id": "a1evRWxZfL3Es8Ne",
+  "tags": []
+}
