@@ -1,0 +1,314 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "is:unread in:inbox"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb8d3dea-de53-42f6-8a27-08bff20ca101",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9owBXnq0aBNMpoNB",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful Support AI. Analyze this email and output JSON.\n\nINCOMING EMAIL:\nSubject: {{ $json.Subject }}\nBody: {{ $json.snippet }}\n\nRULES:\n1. SENTIMENT: If angry, apologize and de-escalate.\n2. FORMATTING (CRITICAL): Write \"reply_text\" as a SINGLE long paragraph. Do NOT use line breaks, newline characters (\\n), or bullet points. Just standard sentences.\n3. SIGNATURE: End with \"Best regards, The AI Support Team\". Do not use placeholders.\n\nOUTPUT JSON ONLY:\n{\n  \"category\": \"String\",\n  \"priority\": \"String\",\n  \"summary\": \"String\",\n  \"reply_text\": \"String\"\n}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "87ffb71c-8ba1-4add-a45e-bf4f3d0d4ed7",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        220
+      ],
+      "id": "127b4bf6-fedc-45b4-af90-80abdd22cbcb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SvpvbgBV5zFIPvDJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawAiOutput = items?.[0]?.json?.text || \"\";\n\nconst sanitizedOutput = rawAiOutput\n  .replace(/```json/gi, \"\")\n  .replace(/```/g, \"\")\n  .trim();\n\ntry {\n  const structuredPayload = JSON.parse(sanitizedOutput);\n\n  if (structuredPayload.reply_text === \"SKIP\") {\n      return [];\n  }\n\n  if (structuredPayload.reply_text) {\n      structuredPayload.reply_text = structuredPayload.reply_text\n          .replace(/\\\\n/g, \" \") \n          .replace(/[\\r\\n]+/gm, \" \")\n          .replace(/\\s+/g, \" \")  \n          .trim();\n  }\n\n  return structuredPayload;\n\n} catch (error) {\n  return {\n    category: \"General\",\n    priority: \"Medium\",\n    summary: \"Error\",\n    reply_text: \"Thank you for your email. We will review it shortly.\"\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "66fb42bd-bf22-4a58-8f9c-62d777e4bbe2",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sSNEqgpUh_KW1AJBrpkp-59OG9BmHtxHjPoV-gK3-VM",
+          "mode": "list",
+          "cachedResultName": "Support Ticket Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sSNEqgpUh_KW1AJBrpkp-59OG9BmHtxHjPoV-gK3-VM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sSNEqgpUh_KW1AJBrpkp-59OG9BmHtxHjPoV-gK3-VM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Category": "={{ $json.category }}",
+            "Priority": "={{ $json.priority }}",
+            "Summary": "={{ $json.summary }}",
+            "Sender": "={{ $('Gmail Trigger').item.json.From }}",
+            "Subject": "={{ $('Gmail Trigger').item.json.Subject }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        800,
+        0
+      ],
+      "id": "665e4115-b9ba-436b-ab2e-954018d6c322",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "AaZXiiiWtBnIOzQN",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $('Code').item.json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1020,
+        0
+      ],
+      "id": "a2432caf-9e6d-4b1c-8557-aa08e2168eed",
+      "name": "Gmail",
+      "webhookId": "7c5436a6-b05e-485c-9544-1acbc7b8aed9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9owBXnq0aBNMpoNB",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "UNREAD"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1240,
+        0
+      ],
+      "id": "24b67c15-3079-455d-baaa-245131bc4a72",
+      "name": "Gmail1",
+      "webhookId": "1b75f5c2-6649-434f-8545-9dc64a23883b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9owBXnq0aBNMpoNB",
+          "name": "Gmail account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "de9b262e-8796-4d3b-ac68-7caa262f9b17",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bacd8033ba65539c76f78e3d88e5a5cd3b77e387307d08eb29cd9df1ba498992"
+  },
+  "id": "yU5Pgv8vfYo6f0dN",
+  "tags": []
+}

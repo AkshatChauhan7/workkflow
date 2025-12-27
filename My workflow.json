@@ -1,9 +1,9 @@
 {
-  "name": "My workflow",
+  "name": "Smart Contact Form Logger",
   "nodes": [
     {
       "parameters": {
-        "formTitle": "Smart Contact Form Logger with Validation",
+        "formTitle": "Contact Form",
         "formFields": {
           "values": [
             {
@@ -29,40 +29,7 @@
       ],
       "id": "4f65fd9a-169a-48bc-ac3f-25da8a66dd1f",
       "name": "On form submission",
-      "webhookId": "80b60ef4-057a-4332-8c35-14c04a8c210f"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "5a3185f3-5ca7-40af-a6e0-92899a236d09",
-              "leftValue": "={{ $json.Email }}",
-              "rightValue": "@",
-              "operator": {
-                "type": "string",
-                "operation": "contains"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        208,
-        0
-      ],
-      "id": "98cca926-b6c4-4b3b-9409-995ff11a117c",
-      "name": "If"
+      "webhookId": "PLACEHOLDER_WEBHOOK_ID"
     },
     {
       "parameters": {
@@ -99,8 +66,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        464,
-        -128
+        250,
+        0
       ],
       "id": "dd6c8ddc-0d18-4b70-ab48-0150eaa40f3e",
       "name": "Edit Fields"
@@ -110,17 +77,13 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "your Google Sheets URL/Value",
-          "mode": "list",
-          "cachedResultName": "Woah",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your Google Sheets URL/Value/edit?usp=drivesdk"
+          "value": "YOUR_GOOGLE_SHEET_ID_OR_URL",
+          "mode": "list"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your Google Sheets URL/Value/edit#gid=0"
+          "value": "Sheet1",
+          "mode": "list"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -181,14 +144,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        672,
-        -128
+        450,
+        0
       ],
       "id": "dd8053e3-d001-4432-906c-77042940ec6a",
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "nx0DOOgDLUc0sZH2",
+          "id": "",
           "name": "Google Sheets account"
         }
       }
@@ -198,21 +161,21 @@
         "sendTo": "{{ $env.ADMIN_EMAIL }}",
         "subject": "=Message from  {{ $json.Name }}",
         "emailType": "text",
-        "message": "=Hey Akshat!\nYou have received a new message from {{ $json.Name }} ({{ $json.Email }}).\n\nMessage:\n{{ $json.Message }}\n\nSubmitted on: {{ $json['Submitted At'] }}",
+        "message": "=Hey Admin!\nYou have received a new message from {{ $json.Name }} ({{ $json.Email }}).\n\nMessage:\n{{ $json.Message }}\n\nSubmitted on: {{ $json['Submitted At'] }}",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        880,
-        -128
+        650,
+        0
       ],
       "id": "e05d0e7a-1f3e-40db-89a5-b5c3ad3f1f8f",
       "name": "Send a message",
-      "webhookId": "561b5edf-613c-4891-8713-70d9b17e088a",
+      "webhookId": "PLACEHOLDER_WEBHOOK_ID",
       "credentials": {
         "gmailOAuth2": {
-          "id": "2S6sYx47dNa5kSD9",
+          "id": "",
           "name": "Gmail account"
         }
       }
@@ -221,17 +184,6 @@
   "pinData": {},
   "connections": {
     "On form submission": {
-      "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
       "main": [
         [
           {
